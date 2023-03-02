@@ -30,8 +30,9 @@ def create_flats_table():
 def insert_flat(flat):
     with psycopg2.connect(user=USER, password=PASSWORD, host=HOST, database=DATABASE) as conn:
         with conn.cursor() as cursor:
-            cursor.execute('''INSERT INTO flats (reference, link, title, price, update_date, description, square, city, street, house_number, district, micro_district, house_year, rooms_quantity)
-             VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+            cursor.execute('''INSERT INTO flats (reference, link, title, price, update_date, description, square, city,
+             street, house_number, district, micro_district, house_year, rooms_quantity, seller_phone, photo_links)
+             VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
               ON CONFLICT (link) DO UPDATE
               SET
               link = EXCLUDED.link,
@@ -46,10 +47,12 @@ def insert_flat(flat):
               district = EXCLUDED.district,
               micro_district = EXCLUDED.micro_district,
               house_year = EXCLUDED.house_year,
-              rooms_quantity = EXCLUDED.rooms_quantity
+              rooms_quantity = EXCLUDED.rooms_quantity,
+              seller_phone = EXCLUDED.seller_phone,
+              photo_links = EXCLUDED.photo_links
             ''', (flat.reference, flat.link, flat.title, flat.price, flat.date, flat.description,
                   flat.square, flat.city, flat.street, flat.house_number, flat.district,
-                  flat.micro_district, flat.house_year, flat.rooms_quantity)
+                  flat.micro_district, flat.house_year, flat.rooms_quantity, flat.seller_phone, flat.images)
                            )
 
 

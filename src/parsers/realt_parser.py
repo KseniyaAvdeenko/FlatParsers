@@ -102,6 +102,17 @@ class RealtParser(ParserInterface):
             except (Exception,):
                 date = datetime.now()
 
+            '''images'''
+            try:
+                images = set()
+                image_divs = html.find_all('div', class_='swiper-slide')
+                for image_div in image_divs:
+                    for img in list(filter(lambda el: el is not None and (el[:4] =='http' and 'user' in el), map(lambda el2: el2['src'], image_div.find_all('img')))):
+                        images.add(img)
+                images = list(images)
+            except(Exception,):
+                images = []
+            print()
             # seller_phone
             flats.append(Flat(
                 link=link,
@@ -117,9 +128,11 @@ class RealtParser(ParserInterface):
                 district=district,
                 micro_district=micro_district,
                 house_year=house_year,
-                rooms_quantity=rooms_quantity
+                rooms_quantity=rooms_quantity,
+                images=images
             ))
         return flats
 
 
-# RealtParser().update_with_last_flats(1, 5)
+RealtParser().enrich_links_to_flats(RealtParser().get_all_last_flats())
+# RealtParser().update_with_last_flats()

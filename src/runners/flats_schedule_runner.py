@@ -3,6 +3,8 @@ import schedule
 import time
 from constants import USED_PARSERS
 
+PARSE_EVERY_MINUTES = 5
+
 
 def parse_all():
     for parser in USED_PARSERS:
@@ -10,7 +12,7 @@ def parse_all():
         thread.start()
 
 
-schedule.every(5).seconds.do(parse_all)
+schedule.every(PARSE_EVERY_MINUTES).minutes.do(parse_all)
 
 while True:
     schedule.run_pending()

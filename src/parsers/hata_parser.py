@@ -117,7 +117,26 @@ class HataParser(ParserInterface):
             except (Exception,):
                 district = 'Не указан'
                 micro_district = 'Не указан'
-                # saler_phone = html.find('div', class_='p_nm', string='Телефон').find_next().text.strip()
+
+            '''seller_phone'''
+            try:
+                seller_phone = html.find('div', class_='p_nm', string='Телефон').find_next().text.strip()
+            except(Exception,):
+                seller_phone = 'Не указан'
+
+            '''images'''
+            try:
+                images = []
+                image_links = list(filter(lambda el2: el2[:19] == 'https://pic.hata.by',
+                                        (map(lambda el2: el2['src'], html.find_all("img")))))
+                for img_links in image_links:
+                    img_link = re.split(r'[&]+', img_links)[1][6:]
+                    images.append(img_link)
+
+            except(Exception,):
+                images = []
+
+
             flats.append(Flat(
                 link=link,
                 reference=self.get_parser_name(),
@@ -132,10 +151,11 @@ class HataParser(ParserInterface):
                 district=district,
                 micro_district=micro_district,
                 house_year=house_year,
-                rooms_quantity=rooms_quantity
+                rooms_quantity=rooms_quantity,
+                seller_phone=seller_phone
             ))
             print()
         return flats
 
-
+# HataParser().enrich_links_to_flats(HataParser().get_all_last_flats())
 # HataParser().update_with_last_flats()

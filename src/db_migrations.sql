@@ -3,3 +3,6 @@ alter table flats
 
 alter table flats
     add is_tg_posted boolean default false;
+
+alter table flats
+    add seller_phone varchar(50);
