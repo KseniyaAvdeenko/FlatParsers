@@ -14,6 +14,7 @@ def create_flats_table():
                 link CHARACTER VARYING(300) UNIQUE,
                 title CHARACTER VARYING(1000),
                 price INTEGER,
+                seller_phone CHARACTER VARYING(50),
                 update_date TIMESTAMP WITH TIME ZONE,
                 description CHARACTER VARYING(10000), 
                 square REAL, 
@@ -23,9 +24,12 @@ def create_flats_table():
                 district CHARACTER VARYING(50),
                 micro_district CHARACTER VARYING(70),
                 house_year INTEGER,
-                rooms_quantity INTEGER)
+                rooms_quantity INTEGER,
+                photo_links TEXT,
+                is_tg_posted BOOLEAN DEFAULT false
+                )
                 ''')
-
+create_flats_table()
 
 def insert_flat(flat):
     with psycopg2.connect(user=USER, password=PASSWORD, host=HOST, database=DATABASE) as conn:
@@ -52,8 +56,35 @@ def insert_flat(flat):
               photo_links = EXCLUDED.photo_links
             ''', (flat.reference, flat.link, flat.title, flat.price, flat.date, flat.description,
                   flat.square, flat.city, flat.street, flat.house_number, flat.district,
-                  flat.micro_district, flat.house_year, flat.rooms_quantity, flat.seller_phone, flat.images)
+                  flat.micro_district, flat.house_year, flat.rooms_quantity, flat.seller_phone, ','.join(flat.images))
                            )
 
 
-# create_flats_table()
+def get_all_not_posted_flats(parser_types):
+    try:
+        with psycopg2.connect(user=USER, password=PASSWORD, host=HOST, database=DATABASE) as conn:
+            with conn.cursor() as cursor:
+                cursor.execute('''
+                    SELECT link, reference, price, title, description, update_date, photo_links, id FROM flats
+                    WHERE (is_tg_posted = false) AND reference IN %(parser_types)s ORDER BY update_date DESC;
+                ''', {'parser_types': tuple(parser_types)}
+                               )
+                return cursor.fetchall()
+    except (Exception, psycopg2.Error) as error:
+        print("Error fetching data from PostgreSQL table", error)
+    finally:
+        # closing database connection
+        if conn:
+            cursor.close()
+            conn.close()
+            print("PostgreSQL connection is closed \n")
+
+
+def update_is_posted_state(ids):
+    with psycopg2.connect(user=USER, password=PASSWORD, host=HOST, database=DATABASE) as conn:
+        with conn.cursor() as cursor:
+            cursor.execute('''
+                UPDATE flats SET is_tg_posted = true
+                WHERE id = ANY(%s);
+            ''', [ids, ]
+                           )

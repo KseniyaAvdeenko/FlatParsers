@@ -112,7 +112,7 @@ class RealtParser(ParserInterface):
                 images = list(images)
             except(Exception,):
                 images = []
-            print()
+            # print()
             # seller_phone
             flats.append(Flat(
                 link=link,
@@ -134,5 +134,4 @@ class RealtParser(ParserInterface):
         return flats
 
 
-RealtParser().enrich_links_to_flats(RealtParser().get_all_last_flats())
 # RealtParser().update_with_last_flats()
