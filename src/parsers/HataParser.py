@@ -1,11 +1,12 @@
+# -*- coding: utf-8 -*-
 import requests
 import re
 from datetime import datetime
 from bs4 import BeautifulSoup
+from tqdm import tqdm
 from src.creds import HEADERS
 from src.data import Flat
 from src.parsers.parser_interface import ParserInterface
-import PySimpleGUI as sg
 
 
 class HataParser(ParserInterface):
@@ -18,7 +19,8 @@ class HataParser(ParserInterface):
         while page_from < page_to:
             response = requests.get(f"https://www.hata.by/sale-flat/page/{page_from}/", headers=HEADERS)
             html = BeautifulSoup(response.content, 'html.parser')
-            for a in html.find_all("a", href=True):
+            links = html.find_all("a", href=True)
+            for a in links:
                 flat_links.append(a['href'])
             page_from += 1
         ready_links = list(filter(lambda el: 'object' in el, flat_links))
@@ -26,23 +28,22 @@ class HataParser(ParserInterface):
 
     def enrich_links_to_flats(self, links):
         flats = []
-        for counter, link in enumerate(links):
-            sg.one_line_progress_meter('Лоад-бар hata.by',
-                                       counter + 1, len(links),
-                                       "Парсинг c hata.by",
-                                       orientation='h',
-                                       bar_color=('white', 'red'))
+        for link in tqdm(links, desc='Парсинг квартир с hata.by', colour='yellow', ascii=False, dynamic_ncols=True,
+                         unit=' квартира', position=0):
             resp = requests.get(link, headers=HEADERS)
             html = BeautifulSoup(resp.content, 'html.parser')
 
             '''title'''
             title = html.find('h1', class_='b-card__title').text.strip()
 
-            '''price'''
-            price = html.find('div', class_='value')
-            if price is not None:
-                price = int(re.sub('[^0-9]', '', price.text.strip()))
-            else:
+            '''price with currency parser from https://myfin.by/bank/kursy_
+            valjut_nbrb because price is calculated in $$ but not in BYN'''
+            try:
+                response = requests.get('https://myfin.by/bank/kursy_valjut_nbrb', headers=HEADERS)
+                cur_html = BeautifulSoup(response.content, 'html.parser')
+                actual_currency = float(cur_html.find('tr', {'data-key': 0}).find_all('td')[1].text)
+                price = int(re.sub('[^0-9]', '', html.find('div', class_='value').text.strip())) * actual_currency
+            except(Exception,):
                 price = 0
 
             '''description'''
@@ -60,7 +61,7 @@ class HataParser(ParserInterface):
                     square_rooms_info_values.append(info_values)
                 square_rooms_info_dict = dict(zip(square_rooms_info_keys, square_rooms_info_values))
                 rooms_quantity = int(square_rooms_info_dict['Комнат'])
-                square = float(re.sub('[^0-9]', '', square_rooms_info_dict['Общая площадь']))
+                square = float(re.sub('[^0-9|.]', '', square_rooms_info_dict['Общая площадь']))
             except (Exception,):
                 rooms_quantity = 'Не указан'
                 square = 'Не указан'
@@ -110,6 +111,8 @@ class HataParser(ParserInterface):
 
             '''district & micro_district'''
             try:
+                district = ''
+                micro_district = ''
                 for info in html.find_all('table', class_='i-table')[3].find('a'):
                     district = info.text.strip()
                 for info in html.find_all('table', class_='i-table')[4].find_all('td'):
@@ -128,13 +131,19 @@ class HataParser(ParserInterface):
             try:
                 images = []
                 image_links = list(filter(lambda el2: el2[:19] == 'https://pic.hata.by',
-                                        (map(lambda el2: el2['src'], html.find_all("img")))))
+                                          (map(lambda el2: el2['src'], html.find_all("img")))))
                 for img_links in image_links:
                     img_link = re.split(r'[&]+', img_links)[1][6:]
                     images.append(img_link)
 
             except(Exception,):
                 images = []
+
+            '''price_for_meter'''
+            try:
+                price_for_meter = price//square
+            except(Exception,):
+                price_for_meter = 0
 
 
             flats.append(Flat(
@@ -152,10 +161,12 @@ class HataParser(ParserInterface):
                 micro_district=micro_district,
                 house_year=house_year,
                 rooms_quantity=rooms_quantity,
-                seller_phone=seller_phone
+                seller_phone=seller_phone,
+                images=images,
+                price_for_meter=price_for_meter
             ))
-            print()
         return flats
 
+
 # HataParser().enrich_links_to_flats(HataParser().get_all_last_flats())
-# HataParser().update_with_last_flats()
+# HataParser().update_with_last_flats(1, 10)

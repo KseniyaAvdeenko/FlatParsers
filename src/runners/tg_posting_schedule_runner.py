@@ -1,8 +1,9 @@
 import schedule
 import time
-from src import db_client, tg_poster
+from src import db_client
+from src.tg_bots import tg_poster
 from src.runners.constants import USED_PARSERS
-import src.tg_poster
+
 
 PARSE_EVERY_MINUTES = 2
 
