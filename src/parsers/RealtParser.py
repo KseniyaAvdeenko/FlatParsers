@@ -6,7 +6,7 @@ from bs4 import BeautifulSoup
 from tqdm import tqdm
 from src.parsers.parser_interface import ParserInterface
 from src.creds import HEADERS
-from src.data import Flat
+from src.parsers.data import Flat
 
 
 class RealtParser(ParserInterface):
@@ -68,22 +68,23 @@ class RealtParser(ParserInterface):
                 rooms_quantity = int(info_dict['Количество комнат'])
                 house_year = int(info_dict['Год постройки'])
             except (Exception,):
-                rooms_quantity = 0
-                square = 0
-                house_year = 0
+                continue
+                # rooms_quantity = 0
+                # square = 0
+                # house_year = 0
 
             '''location: city, street, house_number, district, micro_district'''
             try:
                 house_num = {}
                 location_info_list = []
                 location_info_values_list = []
-                for info in html.find('ul', class_='w-full mb-0.5 -my-1').find_all('span'):
+                for info in html.find('ul', class_='w-full mb-0.5 -my-1').find_all('span', class_='text-basic'):
                     if info.text == 'Номер дома':
                         house_num = {info.text: ''}
                     else:
                         loc_info_keys = info.text
                         location_info_list.append(loc_info_keys)
-                for info in html.find('ul', class_='w-full mb-0.5 -my-1').find_all('a'):
+                for info in html.find('ul', class_='w-full mb-0.5 -my-1').find_all('a', class_='focus:outline-none'):
                     info_values = re.sub("[\n|\xa0]", "", info.text.strip())
                     location_info_values_list.append(info_values)
                 for p in html.find('ul', class_='w-full mb-0.5 -my-1').find_all('p'):
@@ -96,11 +97,12 @@ class RealtParser(ParserInterface):
                 micro_district = info_location_dict['Микрорайон']
                 house_number = house_num['Номер дома']
             except (Exception,):
-                city = 'Не указано'
-                street = 'Не указано'
-                micro_district = 'Не указано'
-                house_number = 'Не указано'
-                district = 'Не указано'
+                continue
+                # city = 'Не указано'
+                # street = 'Не указано'
+                # micro_district = 'Не указано'
+                # house_number = 'Не указано'
+                # district = 'Не указано'
 
             '''date'''
             try:
@@ -140,4 +142,4 @@ class RealtParser(ParserInterface):
         return flats
 
 
-# RealtParser().update_with_last_flats(1, 5)
+# RealtParser().enrich_links_to_flats(RealtParser().get_all_last_flats(1, 20))

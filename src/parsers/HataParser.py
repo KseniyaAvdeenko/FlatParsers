@@ -5,7 +5,7 @@ from datetime import datetime
 from bs4 import BeautifulSoup
 from tqdm import tqdm
 from src.creds import HEADERS
-from src.data import Flat
+from src.parsers.data import Flat
 from src.parsers.parser_interface import ParserInterface
 
 

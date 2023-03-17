@@ -7,7 +7,7 @@ from tqdm import tqdm
 
 from src.parsers.parser_interface import ParserInterface
 from src.creds import HEADERS
-from src.data import Flat
+from src.parsers.data import Flat
 
 
 class GoHomeParser(ParserInterface):
@@ -46,12 +46,6 @@ class GoHomeParser(ParserInterface):
             except(Exception,):
                 price = 0
 
-            '''price_for_meter'''
-            try:
-                price_for_meter = int(re.sub('[^0-9]', '', html.find('div', class_='price').text.replace(' ', '')))
-            except(Exception,):
-                price_for_meter = 0
-
             '''description'''
             description = html.find('article').text.strip()
 
@@ -71,34 +65,46 @@ class GoHomeParser(ParserInterface):
                         name = div_name.text.strip()
                         name_list.append(name)
                     for div_description in li.find_all('div', class_='description'):
-                        feature = div_description.text.strip()
-                        description_list.append(feature)
+                        if div_description.find('a') in div_description:
+                            a = div_description.find('a').text.strip()
+                            description_list.append(a)
+                        else:
+                            desc = div_description.text.strip()
+                            description_list.append(desc)
                 info_common_dict = dict(zip(name_list, description_list))
                 rooms_quantity = int(re.sub('[^0-9]', '', info_common_dict['Комнат:']))
-                square = float(re.sub('[^0-9|.]', '', info_common_dict['Площадь общая:']))
+                raw_square = re.split(r'[ ]', info_common_dict['Площадь общая:'])
+                square = float(raw_square[0])
                 house_year = int(re.sub('[^0-9]', '', info_common_dict['Год постройки:']))
                 date = datetime.strptime(info_common_dict['Дата обновления:'], '%d.%m.%Y')
-                city = info_common_dict['Населенный пункт:']
+                city = 'г.'+ info_common_dict['Населенный пункт:']
+
                 district = info_common_dict['Район:']
                 micro_district = info_common_dict['Микрорайон:']
 
                 '''Address: street, house_number'''
-                address = re.split(r'[,|.]', info_common_dict['Улица, дом:'])
-
-                street = address[0] + '. ' + address[2]
-                house_number = 0
-                if address[6] in address:
-                    house_number = address[4] + '. ' + address[6]
+                address = list(filter(lambda el: el != '', re.split(r'[,|.| ]', info_common_dict['Улица, дом:'])))
+                street = address[0] + '. ' + address[1]
+                house_number = ''
+                if address[3] in address:
+                    house_number = address[2] + '. ' + address[3]
             except(Exception,):
-                date = datetime.now()
-                rooms_quantity = 0
-                square = 0
-                house_year = 0
-                city = 'Не указано'
-                district = 'Не указано'
-                micro_district = 'Не указано'
-                street = 'Не указано'
-                house_number = 'Не указано'
+                continue
+                # date = datetime.now()
+                # rooms_quantity = 0
+                # square = 0
+                # house_year = 0
+                # city = 'Не указано'
+                # district = 'Не указано'
+                # micro_district = 'Не указано'
+                # street = 'Не указано'
+                # house_number = 'Не указано'
+
+            '''price_for_meter'''
+            try:
+                price_for_meter = price // square
+            except(Exception,):
+                price_for_meter = 0
 
             '''images'''
             try:
@@ -125,7 +131,7 @@ class GoHomeParser(ParserInterface):
                 images=images,
                 price_for_meter=price_for_meter
             ))
+        print()
         return flats
 
-
-# GoHomeParser().update_with_last_flats(0, 334)
+# GoHomeParser().update_with_last_flats(0, 300)

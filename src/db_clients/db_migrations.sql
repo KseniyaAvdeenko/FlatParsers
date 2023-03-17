@@ -12,3 +12,4 @@
 
 alter table flats
     add price_for_meter integer;
+

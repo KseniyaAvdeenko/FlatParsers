@@ -4,12 +4,12 @@ import schedule
 import time
 from constants import USED_PARSERS
 
-PARSE_EVERY_MINUTES = 10
+PARSE_EVERY_MINUTES = 5
 
 
 def parse_all():
     for parser in USED_PARSERS:
-        thread = threading.Thread(target=parser.update_with_last_flats, args=(1, 200))
+        thread = threading.Thread(target=parser.update_with_last_flats, args=(0, 150))
         thread.start()
         thread.join()
 
