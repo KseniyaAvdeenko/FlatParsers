@@ -1,9 +1,14 @@
+import logging
 from src.creds import TG_TOKEN
 from aiogram import Bot, Dispatcher, executor, types
 from src.tg_bots.tg_bot_keyboards import *
 from src.db_clients import db_client_tg_bot
+from sentry_logger_telegrambot import *
+
 # https://t.me/FindFlatsBot
 
+logger = logging.getLogger(__name__)
+logger_func = logging_func(logger=logger)
 
 bot = Bot(TG_TOKEN)
 dp = Dispatcher(bot)
@@ -25,6 +30,7 @@ async def start_command(message: types.Message):
 
 
 @dp.message_handler()
+@logger_func
 async def search_flats(message: types.Message):
     if message.text == '🔎 Искать квартиры в Минске 🔍':
         user_query['selected_city'] = 'г.Минск'
@@ -90,7 +96,7 @@ async def search_flats(message: types.Message):
     elif message.text == view_criteria[5]:
         user_query['selected_query'] = "SELECT link, title, price, square, micro_district, street, house_number," \
                                        " photo_links, update_date FROM flats WHERE city = %s and district = %s" \
-                                        " and rooms_quantity = %s order by square asc LIMIT 10;"
+                                       " and rooms_quantity = %s order by square asc LIMIT 10;"
         db_client_tg_bot.UserQuery().insert_selected_query(user_query)
         await message.answer(
             text=generate_message_all_flats(str(message.from_user.id)),
@@ -100,7 +106,7 @@ async def search_flats(message: types.Message):
     elif message.text == view_criteria[6]:
         user_query['selected_query'] = "SELECT link, title, price, square, micro_district, street, house_number," \
                                        " photo_links, update_date FROM flats WHERE city = %s and district = %s" \
-                                        " and rooms_quantity = %s order by square desc LIMIT 10;"
+                                       " and rooms_quantity = %s order by square desc LIMIT 10;"
         db_client_tg_bot.UserQuery().insert_selected_query(user_query)
         await message.answer(
             text=generate_message_all_flats(str(message.from_user.id)),
@@ -121,66 +127,3 @@ async def search_flats(message: types.Message):
 if __name__ == '__main__':
     executor.start_polling(dp)
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-# @dp.callback_query_handler()
-# async def minsk_district_callback(callback: types.CallbackQuery):
-#     global user_query
-#     all_districts = list(map(get_items_from_query, db_client.get_minsk_districts()))
-#     if callback.data in all_districts:
-#         user_query['user_id'] = callback.from_user.id
-#         user_query['username'] = callback.from_user.username
-#         user_query['district'] = callback.data
-#         await callback.message.edit_reply_markup(reply_markup=get_rooms_quantity_by_district(callback.data))
-#     elif callback.data == 'Вернуться':
-#         await callback.message.edit_reply_markup(reply_markup=get_minsk_districts())
-#     rooms_quantity = list(sorted(filter(lambda el: el in range(1, 7), map(get_items_from_query,
-#                                                                           db_client.get_rooms_quantity_by_district(
-#                                                                               user_query['district'])))))
-#     if callback.data in rooms_quantity:
-#         user_query['rooms_quantity'] = callback.data
-#         print(user_query)
-#         await callback.answer(text='not generated')
-# @dp.callback_query_handler()
-# @dp.message_handler()
-# async def minsk_district_callback(callback: types.CallbackQuery, message: types.Message):
-#     global user_query
-#     all_districts = list(map(get_items_from_query, db_client.get_minsk_districts()))
-#     if callback.data in all_districts:
-#         user_query['user_id'] = callback.from_user.id
-#         user_query['username'] = callback.from_user.username
-#         user_query['selected_district'] = callback.data
-#         db_client.insert_user_query_table(user_query)
-#         await callback.answer()
-#         await message.answer(text='Какие квартиры вы хотите посмотреть?',
-#                              reply_markup=flats_show_criteria(callback.data))
-#     elif callback.data == 'Вернуться':
-#         await callback.message.edit_reply_markup(reply_markup=get_minsk_districts())
-# user_query['selected_query'] = "SELECT * FROM flats WHERE city = %s and district = %s and rooms_quantity = %s;"
-# print(user_query)
-# db_client.UserQuery().insert_selected_query(user_query)

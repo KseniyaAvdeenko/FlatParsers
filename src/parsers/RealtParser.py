@@ -7,13 +7,19 @@ from tqdm import tqdm
 from src.parsers.parser_interface import ParserInterface
 from src.creds import HEADERS
 from src.parsers.data import Flat
+from sentry_parsers_logger import *
+import logging
 
+
+logger = logging.getLogger(__name__)
+logger_func = logging_func(logger=logger)
 
 class RealtParser(ParserInterface):
 
     def get_parser_name(self):
         return 'realt'
 
+    @logger_func
     def get_all_last_flats(self, page_from=1, page_to=2):
         flat_links = []
 
@@ -27,6 +33,7 @@ class RealtParser(ParserInterface):
         ready_links = list(filter(lambda el: 'object' in el, flat_links))
         return ready_links
 
+    @logger_func
     def enrich_links_to_flats(self, links):
         flats = []
         for link in tqdm(links, desc='Парсинг квартир с realt.by', colour='yellow', ascii=False, dynamic_ncols=True,
@@ -69,9 +76,7 @@ class RealtParser(ParserInterface):
                 house_year = int(info_dict['Год постройки'])
             except (Exception,):
                 continue
-                # rooms_quantity = 0
-                # square = 0
-                # house_year = 0
+
 
             '''location: city, street, house_number, district, micro_district'''
             try:
@@ -97,12 +102,8 @@ class RealtParser(ParserInterface):
                 micro_district = info_location_dict['Микрорайон']
                 house_number = house_num['Номер дома']
             except (Exception,):
+                logging.exception(f"Exception occurred in {city}, {street}, {district}, {micro_district}, {house_number}")
                 continue
-                # city = 'Не указано'
-                # street = 'Не указано'
-                # micro_district = 'Не указано'
-                # house_number = 'Не указано'
-                # district = 'Не указано'
 
             '''date'''
             try:
@@ -142,4 +143,4 @@ class RealtParser(ParserInterface):
         return flats
 
 
-# RealtParser().enrich_links_to_flats(RealtParser().get_all_last_flats(1, 20))
+# RealtParser().update_with_last_flats(0, 150)

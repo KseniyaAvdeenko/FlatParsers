@@ -1,12 +1,19 @@
+from logging import getLogger
+
 import schedule
 import time
 from src.db_clients import db_client_runners
 from src.tg_bots import tg_poster
 from src.runners.constants import USED_PARSERS
+from sentry_runners_logger import *
 
 PARSE_EVERY_MINUTES = 2
 
+logger = getLogger(__name__)
+logger_func = logging_func(logger=logger)
 
+
+@logger_func
 def do_post_in_telegram():
     parser_names = list(map(lambda el: el.get_parser_name(), USED_PARSERS))
     posts = db_client_runners.get_all_not_posted_flats(parser_names)[:16]
@@ -19,7 +26,6 @@ def do_post_in_telegram():
         tg_poster.send_tg_post(post_message)
         time.sleep(1)
     db_client_runners.update_is_posted_state(list(map(lambda el: el[7], posts)))
-
 
 
 schedule.every(PARSE_EVERY_MINUTES).seconds.do(do_post_in_telegram)

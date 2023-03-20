@@ -4,10 +4,15 @@ import re
 import requests
 from bs4 import BeautifulSoup
 from tqdm import tqdm
-
+from sentry_parsers_logger import *
+import logging
 from src.parsers.parser_interface import ParserInterface
 from src.creds import HEADERS
 from src.parsers.data import Flat
+
+
+logger = logging.getLogger(__name__)
+logger_func = logging_func(logger=logger)
 
 
 class GoHomeParser(ParserInterface):
@@ -15,6 +20,7 @@ class GoHomeParser(ParserInterface):
     def get_parser_name(self):
         return 'gohome'
 
+    @logger_func
     def get_all_last_flats(self, page_from=0, page_to=1):
         flat_links = []
         while page_from < page_to:
@@ -27,6 +33,7 @@ class GoHomeParser(ParserInterface):
         ready_links = list(map(lambda el: 'https://gohome.by'+el, flat_links))
         return ready_links
 
+    @logger_func
     def enrich_links_to_flats(self, links: list):
         flats = []
         for link in tqdm(links, desc='Парсинг квартир с gohome.by', colour='magenta', ascii=False, dynamic_ncols=True,
@@ -77,7 +84,7 @@ class GoHomeParser(ParserInterface):
                 square = float(raw_square[0])
                 house_year = int(re.sub('[^0-9]', '', info_common_dict['Год постройки:']))
                 date = datetime.strptime(info_common_dict['Дата обновления:'], '%d.%m.%Y')
-                city = 'г.'+ info_common_dict['Населенный пункт:']
+                city = 'г.' + info_common_dict['Населенный пункт:']
 
                 district = info_common_dict['Район:']
                 micro_district = info_common_dict['Микрорайон:']
@@ -90,15 +97,6 @@ class GoHomeParser(ParserInterface):
                     house_number = address[2] + '. ' + address[3]
             except(Exception,):
                 continue
-                # date = datetime.now()
-                # rooms_quantity = 0
-                # square = 0
-                # house_year = 0
-                # city = 'Не указано'
-                # district = 'Не указано'
-                # micro_district = 'Не указано'
-                # street = 'Не указано'
-                # house_number = 'Не указано'
 
             '''price_for_meter'''
             try:
@@ -131,7 +129,6 @@ class GoHomeParser(ParserInterface):
                 images=images,
                 price_for_meter=price_for_meter
             ))
-        print()
         return flats
 
 # GoHomeParser().update_with_last_flats(0, 300)
