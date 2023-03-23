@@ -7,6 +7,8 @@ import MyInput from "../UI/input/MyInput";
 import Form from "./Form";
 import FlatsList from "./FlatsList";
 import MySelect from "../UI/select/MySelect";
+import FlatFilter from "./FlatFilter";
+import MyButton from "../UI/button/MyButton";
 
 
 const flatService = new FlatService()
@@ -20,24 +22,26 @@ export default function Flats() {
             setFlats(result);
         })
     },);
-    const [search, setSearch] = useState('')
-    const [selectedSort, setSelectedSort] = useState('')
+    const [filter, setFilter] = useState({sort: '', search: ''})
 
     const sortedFlats = useMemo(() => {
-        if (selectedSort) {
-            return [...flats].sort((a, b) => b[selectedSort] - a[selectedSort])
-        };
+        if (filter.sort) {
+            function Sorting(fl) {
+                if (fl.find(x => [filter.sort] !== 'number'))
+                    return [...flats].sort((a, b) => a[filter.sort].localeCompare(b[filter.sort]))
+                else
+                    return [...flats].sort((a, b) => a[filter.sort] - b[filter.sort])
+            };
+            return Sorting(flats)
+        }
+        ;
         return flats;
-    }, [selectedSort, flats])
+    }, [filter.sort, flats])
 
-     const sortedAndSearchedFlats = useMemo(() => {
-        return sortedFlats.filter(flat => flat.title.toLowerCase().includes(search))
-    }, [search, sortedFlats])
 
-    const sortFlats = (sort) => {
-        setSelectedSort(sort);
-    }
-
+    const sortedAndSearchedFlats = useMemo(() => {
+        return sortedFlats.filter(flat => flat.title.toLowerCase().includes(filter.search))
+    }, [filter.search, sortedFlats])
 
 
     return (
@@ -52,43 +56,7 @@ export default function Flats() {
             <section className="main-container">
                 <div className="flex-container">
                     <aside className="side-bar side-bar_bg-color">
-                        <div className="sorting sorting_border">
-                            <div className="side-bar__items-container">
-                                <div className="sorting-icon">
-                                    <img src={sort_icon} alt="" className="sorting-icon__img"/>
-                                </div>
-                                <div className="sorting-selection">
-                                    <MySelect
-                                        value={selectedSort}
-                                        onChange={sortFlats}
-                                        defaultValue="Сортировка по:"
-                                        options={[
-                                            {value: 'price', name: 'По цене (сначала дешевые)'},
-                                            // {value: 'price', name: 'По цене (сначала дорогие)'},
-                                            {value: 'square', name: "По площади(сначала маленькие)"},
-                                            // {value: 'square', name: "По площади(сначала большие)"},
-                                            {value: 'update_date', name: "По дате обновления(сначала новые)"},
-                                            // {value: 'update_date', name: "По дате обновления(сначала старые)"}
-                                        ]}
-                                    />
-                                </div>
-                            </div>
-                        </div>
-                        <div className="searching sorting_border">
-                            <div className="side-bar__items-container">
-                                <div className="sorting-icon">
-                                    <img src={search_icon} alt="" className="sorting-icon__img"/>
-                                </div>
-                                <div className="search-input">
-                                    <MyInput
-                                        value={search}
-                                        onChange={e => setSearch(e.target.value)}
-                                        type="text"
-                                        className="search"
-                                        placeholder='Поиск'/>
-                                </div>
-                            </div>
-                        </div>
+                        <FlatFilter filter={filter} setFilter={setFilter}/>
                         <div className="filter">
                             <div className="filtered-search">
                                 <div className="side-bar__items-container">
@@ -99,7 +67,22 @@ export default function Flats() {
                                 </div>
                                 <div className="filter-search__form">
                                     <div className="side-bar__items-container">
-                                        <Form/>
+                                        <div className="form">
+
+                                            <select name="" id="" className="selection selection__item">
+                                                <option value="">Выберите город</option>
+                                            </select>
+                                            <select name="" id="" className="selection selection__item">
+                                                <option value="">Выберите район</option>
+                                            </select>
+                                            <select name="" id="" className="selection selection__item">
+                                                <option value="">Выберите микрорайон</option>
+                                            </select>
+                                            <div className="input">
+                                                <label htmlFor="rooms">Количество комнат</label>
+                                                <MyInput id="rooms" type="number" className="input__select"/>
+                                            </div>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
@@ -108,7 +91,7 @@ export default function Flats() {
                     <main className="main-content">
                         {sortedAndSearchedFlats.length > 0
                             ? <div>{sortedAndSearchedFlats.map((flat) => <FlatsList key={flat.id} flat={flat}/>)}</div>
-                            :<h4 className="subtitle subtitle_font-style">Квартиры не найдены</h4>
+                            : <h4 className="subtitle subtitle_font-style">Квартиры не найдены</h4>
                         }
                     </main>
                 </div>

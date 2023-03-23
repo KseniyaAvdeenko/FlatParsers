@@ -209,6 +209,7 @@ body {
 }
 .flat-link {
     color: var(--text-color);
+    text-decoration: none;
 }
 .flat-container .subtitle_font-style {
     font-weight: 700;
