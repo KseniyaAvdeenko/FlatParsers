@@ -1,0 +1,20 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title%}Инфоцентр{% endblock title%}
+{% block content %}
+<h4 class="subtitle subtitle_font-style">Искать квартиру</h4>
+<div class="select">
+    <form method="post" class="form">
+        {% csrf_token %}
+        {{form.city}}<br>
+        {{form.district}}<br>
+        <div class="input">
+            {{form.rooms_quantity}}<br>
+        </div>
+            <button type="submit" class="btn">Искать</button>
+            <span>{{error}}</span>
+        </form>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,33 @@
+{% load static %}
+
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>{% block title%}{% endblock title%}</title>
+    <link rel="stylesheet" href="{% static 'style/style.css' %}">
+</head>
+<body>
+<header class="header header_size header_bg-color">
+    <div class="flex-container">
+        <div class="logo">
+            <img src="{% static 'img/logo_flat.png' %}" alt="" class="logo__img" width="58" height="54">
+        </div>
+    </div>
+</header>
+<div class="intro intro_size intro_color ">
+    <div class="flex-container">
+        <h1 class="title title_font-style">Добро пожаловать в инфоцентр</h1>
+        <h4 class="subtitle subtitle_font-style">Мы собрали квартиры с 2х самых популяных источников <b>realt.by</b> и
+            <b>gohome.by</b> по поиску квартир</h4>
+    </div>
+</div>
+<section class="main-container">
+    {% block content %}{% endblock %}
+</section>
+<footer class="footer footer_size header_bg-color ">
+        <div class="flex-container">
+            <div class="copyrights">Made by K. Avdeenko</div>
+        </div>
+    </footer>
+</body>
+</html>
