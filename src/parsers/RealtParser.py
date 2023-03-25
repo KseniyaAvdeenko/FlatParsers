@@ -7,19 +7,19 @@ from tqdm import tqdm
 from src.parsers.parser_interface import ParserInterface
 from src.creds import HEADERS
 from src.parsers.data import Flat
-from sentry_parsers_logger import *
+from src.sentry_logging.base_logging import logging_func
+from src.sentry_logging.sentry_parsers_logger import *
 import logging
-
 
 logger = logging.getLogger(__name__)
 logger_func = logging_func(logger=logger)
+
 
 class RealtParser(ParserInterface):
 
     def get_parser_name(self):
         return 'realt'
 
-    @logger_func
     def get_all_last_flats(self, page_from=1, page_to=2):
         flat_links = []
 
@@ -33,7 +33,6 @@ class RealtParser(ParserInterface):
         ready_links = list(filter(lambda el: 'object' in el, flat_links))
         return ready_links
 
-    @logger_func
     def enrich_links_to_flats(self, links):
         flats = []
         for link in tqdm(links, desc='Парсинг квартир с realt.by', colour='yellow', ascii=False, dynamic_ncols=True,
@@ -77,7 +76,6 @@ class RealtParser(ParserInterface):
             except (Exception,):
                 continue
 
-
             '''location: city, street, house_number, district, micro_district'''
             try:
                 house_num = {}
@@ -102,7 +100,6 @@ class RealtParser(ParserInterface):
                 micro_district = info_location_dict['Микрорайон']
                 house_number = house_num['Номер дома']
             except (Exception,):
-                logging.exception(f"Exception occurred in {city}, {street}, {district}, {micro_district}, {house_number}")
                 continue
 
             '''date'''
@@ -116,7 +113,8 @@ class RealtParser(ParserInterface):
                 images = set()
                 image_divs = html.find_all('div', class_='swiper-slide')
                 for image_div in image_divs:
-                    for img in list(filter(lambda el: el is not None and (el[:4] =='http' and 'user' in el), map(lambda el2: el2['src'], image_div.find_all('img')))):
+                    for img in list(filter(lambda el: el is not None and (el[:4] == 'http' and 'user' in el),
+                                           map(lambda el2: el2['src'], image_div.find_all('img')))):
                         images.add(img)
                 images = list(images)
             except(Exception,):
@@ -141,6 +139,5 @@ class RealtParser(ParserInterface):
                 price_for_meter=price_for_meter
             ))
         return flats
-
 
 # RealtParser().update_with_last_flats(0, 150)

@@ -1,4 +1,6 @@
 # -*- coding: utf-8 -*-
+import logging
+
 import requests
 import re
 from datetime import datetime
@@ -7,6 +9,11 @@ from tqdm import tqdm
 from src.creds import HEADERS
 from src.parsers.data import Flat
 from src.parsers.parser_interface import ParserInterface
+from src.sentry_logging.base_logging import logging_func
+from src.sentry_logging.sentry_parsers_logger import *
+
+# logger = logging.getLogger(__name__)
+# logger_func = logging_func(logger=logger)
 
 
 class HataParser(ParserInterface):

@@ -7,14 +7,12 @@ from .services import *
 
 class FlatsViewSet(viewsets.ReadOnlyModelViewSet):
     permission_classes = (AllowAny,)
-    queryset = Flats.objects.filter(is_archived=False).all()[:15]
     serializer_class = FlatsSerializers
+
     # pagination_class = StandardResultsSetPagination
     # filter_backends = (DjangoFilterBackend,)
-
-#     filter_fields = [
-#         'city',
-#         # 'district',
-#         # 'micro_district',
-#         # 'rooms_quantity'
-#     ]
+    def get_queryset(self):
+        pk = self.kwargs.get('pk')
+        if not pk:
+            return Flats.objects.filter(is_archived=False).all()
+        return Flats.objects.filter(pk=pk)

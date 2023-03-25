@@ -8,7 +8,7 @@ export default class FlatService {
         return axios.get(url).then(response => response.data)
     }
     getFlat(pk) {
-        const url = `${API_URL}/flats/${pk}`;
+        const url = `${API_URL}/flats/${pk}/`;
         return axios.get(url).then(response => response.data);
     }
 }

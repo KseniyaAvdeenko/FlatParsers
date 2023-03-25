@@ -4,15 +4,13 @@ import re
 import requests
 from bs4 import BeautifulSoup
 from tqdm import tqdm
-from sentry_parsers_logger import *
+
+from src.sentry_logging.base_logging import logging_func
+from src.sentry_logging.sentry_parsers_logger import *
 import logging
 from src.parsers.parser_interface import ParserInterface
 from src.creds import HEADERS
 from src.parsers.data import Flat
-
-
-logger = logging.getLogger(__name__)
-logger_func = logging_func(logger=logger)
 
 
 class GoHomeParser(ParserInterface):
@@ -20,20 +18,18 @@ class GoHomeParser(ParserInterface):
     def get_parser_name(self):
         return 'gohome'
 
-    @logger_func
     def get_all_last_flats(self, page_from=0, page_to=1):
         flat_links = []
         while page_from < page_to:
-            response = requests.get(f"https://gohome.by/sale/index/{page_from*30}", headers=HEADERS)
+            response = requests.get(f"https://gohome.by/sale/index/{page_from * 30}", headers=HEADERS)
             html = BeautifulSoup(response.content, 'html.parser')
             links = html.find_all("a", {'href': True, 'class': 'name__link'})
             for a in links:
                 flat_links.append(a['href'])
             page_from += 1
-        ready_links = list(map(lambda el: 'https://gohome.by'+el, flat_links))
+        ready_links = list(map(lambda el: 'https://gohome.by' + el, flat_links))
         return ready_links
 
-    @logger_func
     def enrich_links_to_flats(self, links: list):
         flats = []
         for link in tqdm(links, desc='Парсинг квартир с gohome.by', colour='magenta', ascii=False, dynamic_ncols=True,

@@ -13,7 +13,7 @@ const MySelect = ({options, defaultValue, value, onChange, className}) => {
                 <option
                     className="selection__item"
                     value={option.value}
-                    key={option.name}
+                    key={option.value}
                 >
                     {option.name}
                 </option>

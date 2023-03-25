@@ -32,7 +32,7 @@ def get_all_not_archived_flats():
     with psycopg2.connect(user=USER, password=PASSWORD, host=HOST, database=DATABASE) as conn:
         with conn.cursor() as cursor:
             cursor.execute('''
-                    SELECT link, title, id FROM flats 
+                    SELECT id, link FROM flats 
                     WHERE (is_archived = false);''', )
 
             return cursor.fetchall()

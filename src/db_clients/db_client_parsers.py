@@ -20,7 +20,7 @@ def create_flats_table():
                 price_for_meter INTEGER,
                 seller_phone CHARACTER VARYING(50),
                 update_date TIMESTAMP WITH TIME ZONE,
-                description CHARACTER VARYING(10000), 
+                description TEXT, 
                 square REAL, 
                 city CHARACTER VARYING(50),
                 street CHARACTER VARYING(50),

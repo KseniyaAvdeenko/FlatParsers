@@ -2,6 +2,7 @@ import logo_flat from "./img/logo_flat.png"
 import React from "react";
 import {BrowserRouter, Route, Routes} from "react-router-dom";
 import Flats from "./components/Flats";
+import Flat from "./components/Flat";
 
 function BaseLayout(){
     return (
@@ -15,7 +16,7 @@ function BaseLayout(){
             </header>
             <Routes>
                 <Route path="/" element={<Flats/>}/>
-                {/*<Route path="/:id" element={<Flat/>}/>*/}
+                <Route path="/:flat_id" element={<Flat/>}/>
             </Routes>
             <footer className="footer footer_size header_bg-color ">
                 <div className="flex-container">

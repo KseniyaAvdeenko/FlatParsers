@@ -3,7 +3,7 @@ import sort_icon from "../img/sort.png";
 import MySelect from "../UI/select/MySelect";
 import search_icon from "../img/search.png";
 import MyInput from "../UI/input/MyInput";
-import filter_icon from "../img/filter.png";
+
 
 const FlatFilter = ({filter, setFilter}) => {
     return (

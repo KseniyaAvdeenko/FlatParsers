@@ -10,7 +10,7 @@ class Flats(models.Model):
     price_for_meter = models.IntegerField('Цена за кв.м.', blank=True, null=True)
     seller_phone = models.CharField('Номер продавца', max_length=30, blank=True, null=True)
     update_date = models.DateTimeField('Дата объявления', blank=True, null=True)
-    description = models.CharField('Описание', max_length=5000, blank=True, null=True)
+    description = models.CharField('Описание', max_length=10000, blank=True, null=True)
     square = models.FloatField('Площадь', blank=True, null=True)
     city = models.CharField('Населенный пункт', max_length=30, blank=True, null=True)
     street = models.CharField('Улица', max_length=500, blank=True, null=True)

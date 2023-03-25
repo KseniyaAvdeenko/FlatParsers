@@ -77,7 +77,7 @@ def flats_show_criteria():
     return criteria_keyboard
 
 
-def generate_message_all_flats(user_id):
+def show_results(message, user_id):
     user_query_data = db_client_tg_bot.UserQuery().show_user_query(user_id)
     sql = user_query_data[0][6]
     data = (user_query_data[0][3], user_query_data[0][4], user_query_data[0][5])
@@ -85,17 +85,16 @@ def generate_message_all_flats(user_id):
     message = f'''Найдено {len(all_flats)} квартиры\n\n'''
     for flat in all_flats:
         message += f"""🏠 <b>{flat[1]}</b>\n
-        <b>Цена:</b> {flat[2]} BYN\n
-        <b>Адрес:</b> {flat[5]}, д. {flat[6]}\n
-        <b>Общая площадь:</b> {flat[3]} кв.м.\n
-        <b>Источник:</b> {flat[0]}\n\n"""
+            <b>Цена:</b> {flat[2]} BYN\n
+            <b>Адрес:</b> {flat[5]}, д. {flat[6]}\n
+            <b>Общая площадь:</b> {flat[3]} кв.м.\n
+            <b>Источник:</b> {flat[0]}\n\n"""
     return message
 
 
 def subscribtion():
     keyboard = ReplyKeyboardMarkup(resize_keyboard=True)
     btn = KeyboardButton(text='💰  Оформить подписку', url=None)
-    # more = KeyboardButton(text="Подробнее", url=None)
     back = KeyboardButton(text='🔙 Вернуться', callback_data='🔙 Вернуться')
     keyboard.add(back, btn)
     return keyboard
@@ -107,3 +106,6 @@ def btn_back():
     keyboard_back.add(btn_back)
     return keyboard_back
 
+SUB_TEXT = """<b>‼ Хотите первыми узнавать самые лучшие предложения? </b>\n
+<b>🔔Оформите подписку всего за 10 BYN/месяц ‼</b> \n
+и первыми узнаете о квартирах по 📉️ самыми низкими ценами за кв.м. по району"""
